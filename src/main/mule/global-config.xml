@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="4c143151-41c5-4f70-bc3b-58b3a5a13474" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<http:request-config name="xe-currency_request_configuration" doc:name="HTTP Request configuration" doc:id="2147a9fd-64d9-4dd9-a2ee-07dbb4b548d1" basePath="${xe.currency.path.base}">
+		<http:request-connection protocol="${xe.currency.protocol}" host="${xe.currency.host}" port="${xe.currency.port}" >
+			<http:authentication >
+				<http:basic-authentication username="${secure::xe.currency.username}" password="${secure::xe.currency.password}" />
+			</http:authentication>
+		</http:request-connection>
+	</http:request-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="cf4569c6-bbe7-4277-8ebe-caf805699f09" file="properties.yaml" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="5eafbec1-085a-4665-baec-567e104765be" file="secure-properties.yaml" key="${mule.key}" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+	<sub-flow name="global-get-transaction-id" doc:id="cefe00bb-594b-453a-ab39-12b3e4c1bc0b" >
+		<set-variable value="#[correlationId]" doc:name="VL SET transactionId" doc:id="098e196f-d84e-44d7-aa35-a4a56f52b712" variableName="transactionId"/>
+	</sub-flow>
+
+</mule>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+    <apikit:config name="currency-api-config" api="currency-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <flow name="currency-api-main">
+        <http:listener config-ref="HTTP_Listener_config" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="currency-api-config" />
+        <error-handler ref="global-error-handling">
+
+        </error-handler>
+    </flow>
+
+    <flow name="get:\currencies:currency-api-config">
+		<flow-ref doc:name="get-all-rates" doc:id="1efcde28-6735-4cab-b4ef-de9aef1c7937" name="get-all-rates" />
+    </flow>
+    <flow name="get:\currencies\(currency):currency-api-config">
+        <ee:transform doc:name="VL SET currency">
+            <ee:variables>
+                <ee:set-variable variableName="currency">attributes.uriParams.'currency'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+		<flow-ref doc:name="get-rate-by-currency-name" doc:id="fb642ec1-0340-42e9-9939-2ea699790804" name="get-rate-by-currency-name"/>
+    </flow>
+</mule>

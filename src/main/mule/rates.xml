@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+
+	<sub-flow name="get-all-rates" doc:id="e46e9e30-a606-4d3b-be15-f51b72e5ac92" >
+		<set-variable value="#[now() as Date]" doc:name="VL SET today" doc:id="335ff375-30db-4b30-ae8d-beeb0094d752" variableName="today"/>
+			<logger level="INFO" doc:name="START" doc:id="220880e9-1a69-414e-b5ad-3dc352dc2d31" message="#[vars.transactionId] - START - get global rates for date [#[vars.today]]" />
+		<http:request method="GET" doc:name="Get todays rates" doc:id="db8f598b-cc02-4231-a71f-0a527e345399" config-ref="xe-currency_request_configuration" path="${xe.currency.path.rate}">
+				<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"from" : "${xe.currency.params.query.rate.from}",
+	"date" : vars.today,
+	"to" : "${xe.currency.params.query.rate.to}",
+	"decimal_places" : 3
+}]]]></http:query-params>
+			</http:request>
+		<ee:transform doc:name="PL SET response" doc:id="b9a07859-1c7e-4a3b-9eb2-df6285ad40e6" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.to map (value, key) -> {
+    "currency": value.quotecurrency,
+    "rate": value.mid
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="END" doc:id="820d1440-63c3-4b9f-8a58-19e39bd5d38f" message="#[vars.transactionId] - END - get global rates for date [#[vars.today]]"/>
+	</sub-flow>
+	<sub-flow name="get-rate-by-currency-name" doc:id="24156677-3fc8-4282-a8eb-4c1c772457de" >
+		<logger level="INFO" doc:name="START" doc:id="b2c66fb4-f64b-4094-9ae4-9b7450a20d95" message="#[vars.transactionId] - START - get global rates for date [#[vars.today]]" />
+		<http:request method="GET" doc:name="Get todays rates" doc:id="5c0643f6-b7cf-4222-86e3-35a7eb7b3d9d" config-ref="xe-currency_request_configuration" path="${xe.currency.path.rate}">
+			<http:query-params><![CDATA[#[output application/java
+---
+{
+	"from" : "${xe.currency.params.query.rate.from}",
+	"date" : vars.today,
+	"to" : vars.currency,
+	"decimal_places" : 3
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="PL SET response" doc:id="09d34fb1-fe02-4cb9-8a27-e30b77a7278c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+(payload.to map (value, key) -> {
+    "currency": value.quotecurrency,
+    "rate": value.mid
+})[0]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="END" doc:id="e62c8cac-205a-4735-886d-f1b30f6c1fcf" message="#[vars.transactionId] - END - get global rates for date [#[vars.today]]" />
+	</sub-flow>
+	
+</mule>

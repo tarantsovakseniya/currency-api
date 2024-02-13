@@ -1,0 +1,21 @@
+#%RAML 1.0
+title: Currency API
+version: v1
+
+/currencies:
+  get:
+    description: Get currencies rate to USD for the current date
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include examples/currencies.json
+  /{currency}:
+    get:
+      description: Get currency by name
+      responses:
+        200:
+          body:
+            application/json:
+              example: !include examples/currency-by-name.json
+              

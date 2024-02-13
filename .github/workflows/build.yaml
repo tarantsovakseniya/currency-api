@@ -54,7 +54,17 @@ jobs:
       with:
           name: artifacts
           path: target/*.jar
-        
+    - name: Artifactory setup
+      uses: jfrog/setup-jfrog-cli@v4
+      env:
+        JF_USER: ${{ secrets.JF_USER }}
+        JF_PASSWORD: ${{ secrets.JF_PASSWORD }}      
+    - run: |
+      jf rt ping
+    - run: |
+       jf rt dl artifacts/
+       jf rt u aether artifacts/
+       jf rt bp 
   deploy:
     needs: build
     runs-on: ubuntu-latest

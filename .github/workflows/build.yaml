@@ -59,12 +59,9 @@ jobs:
       env:
         JF_USER: ${{ secrets.JF_USER }}
         JF_PASSWORD: ${{ secrets.JF_PASSWORD }}      
-    - run: |
-      jf rt ping
-    - run: |
-       jf rt dl artifacts/
-       jf rt u aether artifacts/
-       jf rt bp 
+    - name: Check connectivity with Artifactory
+      run: |
+        jfrog rt ping
   deploy:
     needs: build
     runs-on: ubuntu-latest

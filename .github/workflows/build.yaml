@@ -10,14 +10,11 @@ jobs:
     steps:
     - name: Checkout this repo
       uses: actions/checkout@v3
-    - name: Uses POM Version Bump
-      uses: wlicamele-bw/pom-version-bump@v1.0
-      id: bump
       with:
-        bumpVersionType: bump
-        bumpVersion: patch
-        bumpChangelog: true
-        changelogDesc: ${{ github.event.pull_request.title }}
+        ref: ${{ github.ref }}
+        fetch-depth: 0
+    - name: "Bump version"
+      uses: Wawa27/automatic-version-bump@main
     - name: Get the version number
       run: echo "The Version Number is ${{ steps.bump.outputs.versionNumber }}"
     - name: Cache dependencies

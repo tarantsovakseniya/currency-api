@@ -25,23 +25,8 @@ jobs:
       with:
         distribution: 'zulu'
         java-version: 8
-  test:
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-    - name: Test with Maven
-      env:
-        nexus_username: ${{ secrets.nexus_username }}
-        nexus_password: ${{ secrets.nexus_password }}
-        KEY: ${{ secrets.mule_key }}
-      run: mvn test --settings .maven/settings.xml -Dsecure.key="$KEY"
-    - name: Upload MUnit reports
-      uses: actions/upload-artifact@v3
-      with:
-        name: munit-test-reports
-        path: target/site/munit/coverage/
   build:
-    needs: test
+    needs: setup
     runs-on: ubuntu-latest
     steps:
     - name: Build with Maven
@@ -57,6 +42,19 @@ jobs:
       with:
           name: artifacts
           path: target/*.jar 
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Test with Maven
+      env:
+        KEY: ${{ secrets.mule_key }}
+      run: mvn test --settings .maven/settings.xml -Dsecure.key="$KEY"
+    - name: Upload MUnit reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: munit-test-reports
+        path: target/site/munit/coverage/
   deploy:
     needs: build
     runs-on: ubuntu-latest

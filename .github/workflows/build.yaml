@@ -59,9 +59,9 @@ jobs:
       env:
         JF_USER: ${{ secrets.JF_USER }}
         JF_PASSWORD: ${{ secrets.JF_PASSWORD }}      
-    - name: Check connectivity with Artifactory
-      run: |
-        jfrog rt ping
+    - name: Ping Artifactory
+      run: jf rt ping
+    
   deploy:
     needs: build
     runs-on: ubuntu-latest

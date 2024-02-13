@@ -62,7 +62,11 @@ jobs:
         JF_PASSWORD: ${{ secrets.JF_PASSWORD }}      
     - name: Ping Artifactory
       run: jf rt ping
-    
+    - name: Publish to Artifactory
+      run: |
+        jf rt dl artifacts/
+        jf rt u aether artifacts/
+        jf rt bp 
   deploy:
     needs: build
     runs-on: ubuntu-latest
